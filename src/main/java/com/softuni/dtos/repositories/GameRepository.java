@@ -22,4 +22,5 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     void updateGame(@Param(value="params") String params, @Param(value="gameId") long gameId);
 
     List<Game> findAllByTitle(String title);
+    Game findByTitle(String title);
 }

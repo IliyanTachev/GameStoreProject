@@ -16,4 +16,5 @@ public interface GameService {
     void deleteGame(long gameId2);
     List<ViewGameDto> getAllGames();
     List<DetailGameDto> getAllGamesByTitle(String title);
+    GameDto findByTitle(String title);
 }

@@ -11,4 +11,5 @@ public interface UserService {
     UserDto loginUser(UserLoginDto userLoginDto);
     void logoutUser();
     UserDto getLoggedUser();
+    void updateUser(UserDto user);
 }

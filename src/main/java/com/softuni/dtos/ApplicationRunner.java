@@ -6,6 +6,7 @@ import com.softuni.dtos.entities.Role;
 import com.softuni.dtos.services.GameService;
 import com.softuni.dtos.services.UserService;
 import com.softuni.dtos.utils.ValidationUtil;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +14,9 @@ import javax.validation.ConstraintViolation;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 @Component
 public class ApplicationRunner implements CommandLineRunner {
@@ -23,17 +25,21 @@ public class ApplicationRunner implements CommandLineRunner {
     private UserService userService;
     private final Scanner scanner;
     private final GameService gameService;
+    private final ModelMapper modelMapper;
 
-    public ApplicationRunner(ValidationUtil validationUtil, UserService userService, Scanner scanner, GameService gameService) {
+    public ApplicationRunner(ValidationUtil validationUtil, UserService userService, Scanner scanner, GameService gameService, ModelMapper modelMapper) {
         this.validationUtil = validationUtil;
         this.userService = userService;
         this.scanner = scanner;
         this.gameService = gameService;
 
+        this.modelMapper = modelMapper;
     }
 
     @Override
     public void run(String... args) throws Exception {
+
+        Set<GameDto> shoppingCart = new HashSet<>();
         while(true){
             System.out.println("Enter a command: ");
             String inputStr = scanner.nextLine();
@@ -137,6 +143,59 @@ public class ApplicationRunner implements CommandLineRunner {
                 case "OwnedGames":
                     UserDto loggedUser = this.userService.getLoggedUser();
                     loggedUser.getGames().stream().map(Game::getTitle).forEach(System.out::println);
+                    break;
+
+                case "AddItem":
+                    if(this.userService.getLoggedUser() != null){
+                        System.out.println("You must be logged in to add a game to shopping cart.");
+                    } else {
+                        String gameTitle = input[1];
+                        if (this.gameService.findByTitle(gameTitle) != null) {
+                            Set<Game> userGames = this.userService.getLoggedUser().getGames();
+                            for(Game game : userGames){
+                                if(game.getTitle().equals(gameTitle)) {
+                                    System.out.println("This game is already in your games inventory.");
+                                    break;
+                                }
+                            }
+                            for (GameDto game : shoppingCart){
+                                if(game.getTitle().equals(gameTitle)){
+                                    System.out.println("This game is already in your shopping cart. Cannot be added twice.");
+                                    break;
+                                }
+                            }
+
+                            shoppingCart.add(this.gameService.findByTitle(gameTitle));
+                            System.out.println(gameTitle + " added to cart.");
+                        } else {
+                            System.out.println("Game title does not exist.");
+                            break;
+                        }
+                    }
+                    break;
+                case "RemoveItem":
+                        String gameTitle = input[1];
+                        boolean isGameInShoppingCart = false;
+                        for(GameDto game : shoppingCart){
+                            if(game.getTitle().equals(gameTitle)){
+                                isGameInShoppingCart = true;
+                            }
+                        }
+
+                       if(isGameInShoppingCart){
+                            shoppingCart.removeIf(g -> g.getTitle().equals(gameTitle));
+                            System.out.println(gameTitle + " removed from cart.");
+                       } else System.out.println("Cannot remove game. Game not persists in shopping cart.");
+
+                    break;
+                case "BuyItem":
+                    UserDto user = this.userService.getLoggedUser();
+                    for(GameDto game : shoppingCart){
+                        user.getGames().add(modelMapper.map(game, Game.class));
+                    }
+                    this.userService.updateUser(user);
+                    System.out.println("Successfully bought games:");
+                    shoppingCart.forEach(g->System.out.println(" -" + g.getTitle()));
                     break;
             }
         }

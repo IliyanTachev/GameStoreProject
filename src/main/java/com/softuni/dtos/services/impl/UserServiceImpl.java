@@ -51,4 +51,9 @@ public class UserServiceImpl implements UserService {
     public UserDto getLoggedUser() {
         return modelMapper.map(this.userRepository.findByLogged(true), UserDto.class);
     }
+
+    @Override
+    public void updateUser(UserDto user) {
+        this.userRepository.saveAndFlush(modelMapper.map(user, User.class));
+    }
 }

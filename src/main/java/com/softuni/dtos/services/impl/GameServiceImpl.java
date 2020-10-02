@@ -56,4 +56,9 @@ public class GameServiceImpl implements GameService {
                 .map(game -> modelMapper.map(game, DetailGameDto.class))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public GameDto findByTitle(String title) {
+        return modelMapper.map(this.gameRepository.findByTitle(title), GameDto.class);
+    }
 }
