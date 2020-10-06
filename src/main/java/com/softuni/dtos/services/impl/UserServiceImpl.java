@@ -9,6 +9,7 @@ import com.softuni.dtos.repositories.UserRepository;
 import com.softuni.dtos.services.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -34,26 +35,40 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto loginUser(UserLoginDto userLoginDto) {
-        return modelMapper.map(this.userRepository.updateLoginStatus(userLoginDto.getEmail(), userLoginDto.getPassword(), true), UserDto.class);
+        this.userRepository.updateLoginStatus(userLoginDto.getEmail(), userLoginDto.getPassword(), true);
+        return modelMapper.map(this.userRepository.findByLogged(true), UserDto.class);
     }
 
     @Override
+    @Transactional
     public void logoutUser() {
         User foundUser =  this.userRepository.findByLogged(true);
         if(foundUser != null){
             this.userRepository.updateLoginStatus(foundUser.getEmail(), foundUser.getPassword(), false);
-            System.out.printf("User %s successfully logged out.", foundUser.getFullName());
+            System.out.printf("User %s successfully logged out.%n", foundUser.getFullName());
         } else System.out.println("Cannot log out. No user was logged in.");
     }
 
     @Override
     public UserDto getLoggedUser() {
-        return modelMapper.map(this.userRepository.findByLogged(true), UserDto.class);
+       User user =  this.userRepository.findByLogged(true);
+       return user != null ? modelMapper.map(user, UserDto.class) : null;
     }
 
     @Override
     public void updateUser(UserDto user) {
         this.userRepository.saveAndFlush(modelMapper.map(user, User.class));
+    }
+
+    @Override
+    public boolean isAdminLogged() {
+        UserDto loggedUser = this.getLoggedUser();
+        if (!(loggedUser != null && loggedUser.getRole() == Role.ADMIN)) {
+            System.out.println("You dont have enough privileges to add/edit/remove games to catalog. (ADMIN access required)");
+            return false;
+        }
+        return true;
     }
 }

@@ -1,5 +1,7 @@
 package com.softuni.dtos.entities;
 import com.softuni.dtos.entities.BaseEntity;
+import org.hibernate.annotations.DynamicUpdate;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
@@ -9,18 +11,29 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
+@DynamicUpdate
 @Table(name="games")
 public class Game extends BaseEntity {
     private String title;
     private String trailer;
     private String imageThumbnail;
-    private int size;
+    private double size;
     private BigDecimal price;
     private String description;
     private LocalDate releaseDate;
-    private Set<Order> orders;
+//    private Set<Order> orders;
 
     public Game() {
+    }
+
+    public Game(String title, BigDecimal price, double size, String trailer, String imageThumbnail, String description, LocalDate releaseDate) {
+        this.title = title;
+        this.price = price;
+        this.size = size;
+        this.trailer = trailer;
+        this.imageThumbnail = imageThumbnail;
+        this.description = description;
+        this.releaseDate = releaseDate;
     }
 
     @Column(nullable = false, unique = true)
@@ -49,11 +62,11 @@ public class Game extends BaseEntity {
         this.imageThumbnail = imageThumbnail;
     }
 
-    public int getSize() {
+    public double getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(double size) {
         this.size = size;
     }
 
@@ -83,12 +96,12 @@ public class Game extends BaseEntity {
     }
 
 
-    @ManyToMany(mappedBy = "products")
-    public Set<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(Set<Order> orders) {
-        this.orders = orders;
-    }
+//    @ManyToMany(mappedBy = "products")
+//    public Set<Order> getOrders() {
+//        return orders;
+//    }
+//
+//    public void setOrders(Set<Order> orders) {
+//        this.orders = orders;
+//    }
 }

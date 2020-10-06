@@ -1,6 +1,7 @@
 package com.softuni.dtos.dtos;
 
 import com.softuni.dtos.entities.Order;
+import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.Pattern;
@@ -8,19 +9,21 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
+@Component
 public class GameDto {
     private String title;
     private BigDecimal price;
-    private int size;
+    private double size;
     private String trailer;
     private String imageThumbnail;
     private String description;
     private LocalDate releaseDate;
+//    private Set<OrderDto> orders;
 
     public GameDto() {
     }
 
-    public GameDto(String title, BigDecimal price, int size, String trailer, String imageThumbnail, String description, LocalDate releaseDate) {
+    public GameDto(String title, BigDecimal price, double size, String trailer, String imageThumbnail, String description, LocalDate releaseDate) {
         this.title = title;
         this.price = price;
         this.size = size;
@@ -39,7 +42,7 @@ public class GameDto {
         this.title = title;
     }
 
-    @Pattern(regexp = "(=(.){11})$", message = "Trailer is invalid.")
+    @Pattern(regexp = "(.{11})", message = "Trailer is invalid.")
     public String getTrailer() {
         return trailer;
     }
@@ -48,7 +51,7 @@ public class GameDto {
         this.trailer = trailer;
     }
 
-    @Pattern(regexp = "^(http:\\/\\/|https:\\/\\/)", message = "Thumbnail is invalid")
+    @Pattern(regexp = "^(http:\\/\\/|https:\\/\\/).+", message = "Thumbnail is invalid")
     public String getImageThumbnail() {
         return imageThumbnail;
     }
@@ -58,13 +61,10 @@ public class GameDto {
     }
 
     @DecimalMin(value="1", inclusive = true, message = "Size is invalid")
-    public int getSize() {
+    public double getSize() {
         return size;
     }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
+    public void setSize(double size) { this.size = size; }
 
     @DecimalMin(value="1", inclusive = true, message = "Price is invalid")
     public BigDecimal getPrice() {
@@ -91,4 +91,12 @@ public class GameDto {
     public void setReleaseDate(LocalDate releaseDate) {
         this.releaseDate = releaseDate;
     }
+
+//    public Set<OrderDto> getOrders() {
+//        return orders;
+//    }
+//
+//    public void setOrders(Set<OrderDto> orders) {
+//        this.orders = orders;
+//    }
 }

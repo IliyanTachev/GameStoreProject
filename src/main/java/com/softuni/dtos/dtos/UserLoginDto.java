@@ -15,7 +15,7 @@ public class UserLoginDto {
         this.password = password;
     }
 
-    @Pattern(regexp = ".+@.+\\.", message = "Email is not valid.")
+    @Pattern(regexp = ".+@.+\\..{2,3}", message = "Email is not valid.")
     public String getEmail() {
         return email;
     }

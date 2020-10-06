@@ -10,6 +10,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Modifying
     @Query("update User as u set u.logged=?3 where u.email=?1 and u.password=?2")
-    User updateLoginStatus(String email, String password, boolean status);
+    int updateLoginStatus(String email, String password, boolean status);
     User findByLogged(boolean status);
 }

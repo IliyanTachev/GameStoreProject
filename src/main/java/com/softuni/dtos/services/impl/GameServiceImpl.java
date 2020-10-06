@@ -3,12 +3,19 @@ package com.softuni.dtos.services.impl;
 import com.softuni.dtos.dtos.DetailGameDto;
 import com.softuni.dtos.dtos.GameDto;
 import com.softuni.dtos.dtos.ViewGameDto;
+import com.softuni.dtos.entities.Game;
 import com.softuni.dtos.repositories.GameRepository;
 import com.softuni.dtos.services.GameService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +28,7 @@ public class GameServiceImpl implements GameService {
         this.modelMapper = modelMapper;
     }
 
+    @Transactional
     public void addGame(GameDto gameDto){
         this.gameRepository.insertNewGame(gameDto.getTitle(), gameDto.getPrice(),
                 gameDto.getSize(), gameDto.getTrailer(), gameDto.getImageThumbnail(),
@@ -29,12 +37,33 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public GameDto validateID(long id) {
-        return modelMapper.map(this.gameRepository.findById(id), GameDto.class);
+        var gameFound = this.gameRepository.findById(id).orElse(null);
+        if(gameFound != null) return modelMapper.map(gameFound, GameDto.class);
+        return null;
     }
 
     @Override
-    public void updateGame(String params, long gameId) {
-        this.gameRepository.updateGame(params, gameId);
+    @Transactional
+    public void updateGame(Map<String, String> params, long gameId) {
+        Game game = this.gameRepository.findById(gameId).orElse(null);
+        System.out.println();
+
+        for(String key : params.keySet()) {
+            if (key.equals("title")) {
+                game.setTitle(params.get("title"));
+            } else if (key.equals("price")) {
+                game.setPrice(new BigDecimal(params.get("price")));
+            } else if (key.equals("size")) {
+                game.setSize(Double.parseDouble(params.get("size")));
+            } else if (key.equals("trailer")) {
+                game.setTrailer(params.get("trailer"));
+            } else if (key.equals("thumbnail")) {
+                game.setImageThumbnail(params.get("thumbnail"));
+            } else if (key.equals("description")) {
+                game.setDescription(params.get("description"));
+            }
+        }
+        this.gameRepository.saveAndFlush(game);
     }
 
     @Override
@@ -50,15 +79,18 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public List<DetailGameDto> getAllGamesByTitle(String title) {
-        return this.gameRepository.findAllByTitle(title)
-                .stream()
-                .map(game -> modelMapper.map(game, DetailGameDto.class))
-                .collect(Collectors.toList());
+    public DetailGameDto getGameDetailByTitle(String title) {
+       return retrieveGameResult(new DetailGameDto(), title, t -> this.gameRepository.findByTitle(t));
     }
 
     @Override
-    public GameDto findByTitle(String title) {
-        return modelMapper.map(this.gameRepository.findByTitle(title), GameDto.class);
+    public GameDto getGameByTitle(String title) {
+        return retrieveGameResult(new GameDto(), title, t -> this.gameRepository.findByTitle(t));
+    }
+
+    private <T> T retrieveGameResult(T dtoClass, String searchProperty, Function<String,Game> func){
+        Game gameFound = func.apply(searchProperty);
+        if(gameFound != null) return modelMapper.map(gameFound, (Type) dtoClass.getClass());
+        return null;
     }
 }

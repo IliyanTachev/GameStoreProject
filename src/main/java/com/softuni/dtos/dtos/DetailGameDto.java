@@ -53,9 +53,9 @@ public class DetailGameDto {
 
     @Override
     public String toString() {
-        return "Title: " + this.title +
-                "Price: " + this.price +
-                "Description: " + this.description +
-                "ReleaseDate: " + this.releaseDate;
+        return "Title: " + this.title + "\n" +
+                "Price: " + this.price + "\n" +
+                "Description: " + this.description + "\n" +
+                "ReleaseDate: " + this.releaseDate + "\n";
     }
 }

@@ -10,10 +10,13 @@ public class UserDto {
     private String fullName;
     private String email;
     private String password;
-    private Set<Game> games;
+    private Set<GameDto> games;
     private Role role;
     private Set<Order> orders;
     private boolean logged;
+
+    public UserDto() {
+    }
 
     public String getFullName() {
         return fullName;
@@ -39,11 +42,11 @@ public class UserDto {
         this.password = password;
     }
 
-    public Set<Game> getGames() {
+    public Set<GameDto> getGames() {
         return games;
     }
 
-    public void setGames(Set<Game> games) {
+    public void setGames(Set<GameDto> games) {
         this.games = games;
     }
 

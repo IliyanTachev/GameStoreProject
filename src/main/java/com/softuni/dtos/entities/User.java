@@ -42,7 +42,7 @@ public class User extends BaseEntity{
         this.password = password;
     }
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
      public Set<Game> getGames() {
         return games;
     }
@@ -60,7 +60,7 @@ public class User extends BaseEntity{
         this.role = role;
     }
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     public Set<Order> getOrders() {
         return orders;
     }

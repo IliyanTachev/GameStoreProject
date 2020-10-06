@@ -12,4 +12,5 @@ public interface UserService {
     void logoutUser();
     UserDto getLoggedUser();
     void updateUser(UserDto user);
+    boolean isAdminLogged();
 }

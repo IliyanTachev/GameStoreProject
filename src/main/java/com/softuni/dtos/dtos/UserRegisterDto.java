@@ -4,17 +4,17 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 public class UserRegisterDto {
-    private String fullName;
     private String email;
     private String password;
+    private String fullName;
 
     public UserRegisterDto() {
     }
 
-    public UserRegisterDto(String fullName, String email, String password) {
-        this.fullName = fullName;
+    public UserRegisterDto(String email, String password, String fullName) {
         this.email = email;
         this.password = password;
+        this.fullName = fullName;
     }
 
     public String getFullName() {
@@ -25,7 +25,7 @@ public class UserRegisterDto {
         this.fullName = fullName;
     }
 
-    @Pattern(regexp = ".+@.+\\.", message = "Email is not valid.")
+    @Pattern(regexp = ".+@.+\\..{2,3}", message = "Email is not valid.")
     public String getEmail() {
         return email;
     }
