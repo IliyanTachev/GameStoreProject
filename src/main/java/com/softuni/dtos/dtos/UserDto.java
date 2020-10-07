@@ -7,15 +7,25 @@ import com.softuni.dtos.entities.Role;
 import java.util.Set;
 
 public class UserDto {
+    private long id;
     private String fullName;
     private String email;
     private String password;
     private Set<GameDto> games;
     private Role role;
-    private Set<Order> orders;
+    private Set<OrderDto> orders;
+    private Set<GameDto> shoppingCart;
     private boolean logged;
 
     public UserDto() {
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getFullName() {
@@ -50,6 +60,14 @@ public class UserDto {
         this.games = games;
     }
 
+    public Set<GameDto> getShoppingCart() {
+        return shoppingCart;
+    }
+
+    public void setShoppingCart(Set<GameDto> shoppingCart) {
+        this.shoppingCart = shoppingCart;
+    }
+
     public Role getRole() {
         return role;
     }
@@ -58,11 +76,11 @@ public class UserDto {
         this.role = role;
     }
 
-    public Set<Order> getOrders() {
+    public Set<OrderDto> getOrders() {
         return orders;
     }
 
-    public void setOrders(Set<Order> orders) {
+    public void setOrders(Set<OrderDto> orders) {
         this.orders = orders;
     }
 

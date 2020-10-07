@@ -26,7 +26,7 @@ public class ApplicationRunner implements CommandLineRunner {
     private final Scanner scanner;
     private final GameService gameService;
     private final ModelMapper modelMapper;
-    Set<GameDto> shoppingCart = new HashSet<>();
+    private UserDto loggedUser = new UserDto();
 
     @Autowired
     public ApplicationRunner(ValidationUtil validationUtil, UserService userService, Scanner scanner, GameService gameService, ModelMapper modelMapper) {
@@ -66,7 +66,7 @@ public class ApplicationRunner implements CommandLineRunner {
                     UserLoginDto userLoginDto = new UserLoginDto(input[1], input[2]);
                     if(this.validationUtil.isValid(userLoginDto)){
                         if(this.userService.checkUserByCredentials(userLoginDto) != null){
-                            UserDto loggedUser = this.userService.loginUser(userLoginDto);
+                            loggedUser = this.userService.loginUser(userLoginDto);
                             System.out.printf("Logged as %s%n", loggedUser.getFullName());
                         } else {
                             System.out.println("Incorrect username / password");
@@ -141,11 +141,15 @@ public class ApplicationRunner implements CommandLineRunner {
                     break;
                 case "OwnedGames":
                     UserDto loggedUser = this.userService.getLoggedUser();
-                    if(loggedUser != null) loggedUser.getGames().stream().map(GameDto::getTitle).forEach(System.out::println);
+                    if(loggedUser != null) {
+                        if(loggedUser.getGames().size() == 0) System.out.println("You don't own any games.");
+                        loggedUser.getGames().stream().map(GameDto::getTitle).forEach(System.out::println);
+                    }
+
                     break;
 
                 case "AddItem":
-                    if(this.userService.getLoggedUser() == null){
+                    if((loggedUser = this.userService.getLoggedUser()) == null){
                         System.out.println("You must be logged in to add a game to shopping cart.");
                         break;
                     }
@@ -162,26 +166,28 @@ public class ApplicationRunner implements CommandLineRunner {
                             break;
                         }
                     }
-                    for (GameDto game : shoppingCart){
+                    for (GameDto game : loggedUser.getShoppingCart()){
                         if(game.getTitle().equals(gameTitleToAdd)){
                             System.out.println("This game is already in your shopping cart. Cannot be added twice.");
                             break;
                         }
                     }
 
-                    shoppingCart.add(this.gameService.getGameByTitle(gameTitleToAdd));
+                    loggedUser.getShoppingCart().add(this.gameService.getGameByTitle(gameTitleToAdd));
+                    this.userService.updateUser(loggedUser);
                     System.out.println(gameTitleToAdd + " added to cart.");
 
                     break;
 
                 case "RemoveItem":
-                    if(this.userService.getLoggedUser() == null){
+                    if((loggedUser = this.userService.getLoggedUser()) == null){
                         System.out.println("You must be logged in to add a game to shopping cart.");
                         break;
                     }
+
                     String gameTitleToRemove = input[1];
                     boolean isGameInShoppingCart = false;
-                    for (GameDto game : shoppingCart) {
+                    for (GameDto game : loggedUser.getShoppingCart()) {
                         if (game.getTitle().equals(gameTitleToRemove)) {
                             isGameInShoppingCart = true;
                             break;
@@ -189,36 +195,37 @@ public class ApplicationRunner implements CommandLineRunner {
                     }
 
                     if (isGameInShoppingCart) {
-                        shoppingCart.removeIf(g -> g.getTitle().equals(gameTitleToRemove));
+                        loggedUser.getShoppingCart().removeIf(g -> g.getTitle().equals(gameTitleToRemove));
+                        this.userService.updateUser(loggedUser);
                         System.out.println(gameTitleToRemove + " removed from cart.");
                     } else System.out.println("Cannot remove game. Game not persists in shopping cart.");
 
                     break;
                 case "BuyItem":
-                    if(this.userService.getLoggedUser() == null){
+                    if((loggedUser = this.userService.getLoggedUser()) == null){
                         System.out.println("You must be logged in to buy games.");
                         break;
                     }
                     UserDto user = this.userService.getLoggedUser();
                     Set<GameDto> games = user.getGames();
-                    for(GameDto game : shoppingCart){
+                    for(GameDto game : loggedUser.getShoppingCart()){
                         games.add(game);
                     }
                     user.setGames(games);
                     this.userService.updateUser(user);
                     System.out.println("Successfully bought games:");
-                    shoppingCart.forEach(g->System.out.println(" -" + g.getTitle()));
+                    loggedUser.getShoppingCart().forEach(g->System.out.println(" -" + g.getTitle()));
                     break;
 
                 case "Show shopping cart":
-                    if(this.userService.getLoggedUser() == null){
+                    if((loggedUser = this.userService.getLoggedUser()) == null){
                         System.out.println("You must be logged in to add a game to shopping cart.");
                         break;
                     }
 
-                    if(this.shoppingCart.size() != 0) {
+                    if(loggedUser.getShoppingCart().size() != 0) {
                         System.out.println(" /Shopping cart: ");
-                        this.shoppingCart.forEach(g-> System.out.println(g.getTitle()));
+                        loggedUser.getShoppingCart().forEach(g-> System.out.println(g.getTitle()));
                     }
                     else System.out.println("Shopping cart is empty.");
                     break;

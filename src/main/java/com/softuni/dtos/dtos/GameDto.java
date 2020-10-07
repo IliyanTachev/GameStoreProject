@@ -11,6 +11,7 @@ import java.util.Set;
 
 @Component
 public class GameDto {
+    private long id;
     private String title;
     private BigDecimal price;
     private double size;
@@ -18,7 +19,6 @@ public class GameDto {
     private String imageThumbnail;
     private String description;
     private LocalDate releaseDate;
-//    private Set<OrderDto> orders;
 
     public GameDto() {
     }
@@ -31,6 +31,14 @@ public class GameDto {
         this.imageThumbnail = imageThumbnail;
         this.description = description;
         this.releaseDate = releaseDate;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     @Pattern(regexp = "^[A-Z].{3,100}")
@@ -91,12 +99,4 @@ public class GameDto {
     public void setReleaseDate(LocalDate releaseDate) {
         this.releaseDate = releaseDate;
     }
-
-//    public Set<OrderDto> getOrders() {
-//        return orders;
-//    }
-//
-//    public void setOrders(Set<OrderDto> orders) {
-//        this.orders = orders;
-//    }
 }

@@ -1,5 +1,7 @@
 package com.softuni.dtos.entities;
 
+import org.springframework.data.repository.cdi.Eager;
+
 import javax.persistence.*;
 import java.util.Set;
 
@@ -9,7 +11,8 @@ public class User extends BaseEntity{
     private String fullName;
     private String email;
     private String password;
-    private Set<Game> games;
+    private Set<Game> ownedGames;
+    private Set<Game> shoppingCart;
     private Role role;
     private Set<Order> orders;
     private boolean logged;
@@ -43,12 +46,23 @@ public class User extends BaseEntity{
     }
 
     @ManyToMany(fetch = FetchType.EAGER)
-     public Set<Game> getGames() {
-        return games;
+     public Set<Game> getOwnedGames() {
+        return ownedGames;
     }
 
-    public void setGames(Set<Game> games) {
-        this.games = games;
+    public void setOwnedGames(Set<Game> games) {
+        this.ownedGames = games;
+    }
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name="users_shopping_cart_games", joinColumns = @JoinColumn(name="user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name="shopping_cart_game_id", referencedColumnName = "id"))
+    public Set<Game> getShoppingCart() {
+        return shoppingCart;
+    }
+
+    public void setShoppingCart(Set<Game> shoppingCart) {
+        this.shoppingCart = shoppingCart;
     }
 
     @Enumerated(EnumType.STRING)
