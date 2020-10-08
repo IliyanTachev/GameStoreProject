@@ -1,5 +1,6 @@
 package com.softuni.dtos.config;
 
+import com.softuni.dtos.utils.ConsoleUtil;
 import com.softuni.dtos.utils.ValidationUtil;
 import com.softuni.dtos.utils.ValidationUtilImpl;
 import org.modelmapper.ModelMapper;
@@ -25,5 +26,10 @@ public class ApplicationConfiguration {
     @Bean
     public ValidationUtil validationUtil(){
         return new ValidationUtilImpl();
+    }
+
+    @Bean
+    public ConsoleUtil consoleUtil(){
+        return new ConsoleUtil();
     }
 }

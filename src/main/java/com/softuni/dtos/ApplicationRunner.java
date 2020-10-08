@@ -1,9 +1,6 @@
 package com.softuni.dtos;;
 
 import com.softuni.dtos.dtos.*;
-import com.softuni.dtos.entities.Game;
-import com.softuni.dtos.entities.Role;
-import com.softuni.dtos.entities.User;
 import com.softuni.dtos.services.GameService;
 import com.softuni.dtos.services.UserService;
 import com.softuni.dtos.utils.ConsoleUtil;
@@ -14,7 +11,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import javax.validation.ConstraintViolation;
-import java.io.Console;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -28,15 +24,17 @@ public class ApplicationRunner implements CommandLineRunner {
     private final Scanner scanner;
     private final GameService gameService;
     private final ModelMapper modelMapper;
+    private final ConsoleUtil consoleUtil;
     private UserDto loggedUser = new UserDto();
 
     @Autowired
-    public ApplicationRunner(ValidationUtil validationUtil, UserService userService, Scanner scanner, GameService gameService, ModelMapper modelMapper) {
+    public ApplicationRunner(ValidationUtil validationUtil, UserService userService, Scanner scanner, GameService gameService, ModelMapper modelMapper, ConsoleUtil consoleUtil) {
         this.validationUtil = validationUtil;
         this.userService = userService;
         this.scanner = scanner;
         this.gameService = gameService;
         this.modelMapper = modelMapper;
+        this.consoleUtil = consoleUtil;
     }
 
     @Override
@@ -49,13 +47,13 @@ public class ApplicationRunner implements CommandLineRunner {
             switch(input[0]){
                 case "RegisterUser":
                     if(!input[2].equals(input[3])) {
-                        System.out.println("Passwords do not match.");
+                        ConsoleUtil.printInYellow("Passwords do not match.");
                         break;
                     }
                     UserRegisterDto userRegisterDto = new UserRegisterDto(input[1], input[2], input[4]);
                     if(validationUtil.isValid(userRegisterDto)){
                         this.userService.registerUser(userRegisterDto);
-                        System.out.printf("User: %s was registered successfully.%n", input[4]);
+                        ConsoleUtil.printInGreen("User: " + input[4] + " was registered successfully.");
                     } else {
                         this.validationUtil.getViolations(userRegisterDto)
                         .stream()
@@ -113,7 +111,7 @@ public class ApplicationRunner implements CommandLineRunner {
                                     updateStatementParams.put(temp[0], temp[1]);
                                 }
                                 this.gameService.updateGame(updateStatementParams, gameId);
-                                System.out.printf("Edited %s (ID=%d)%n", editGame.getTitle(), gameId);
+                                ConsoleUtil.printInGreen("Edited " + editGame.getTitle() + " (ID=" + gameId + ")");
                             } else {
                                 ConsoleUtil.printInYellow("There is no game with id=" + gameId);
                             }
@@ -158,19 +156,19 @@ public class ApplicationRunner implements CommandLineRunner {
 
                     String gameTitleToAdd = input[1];
                     if (this.gameService.getGameByTitle(gameTitleToAdd) == null) {
-                        System.out.println("Game title does not exist.");
+                        ConsoleUtil.printInYellow("Game title does not exist.");
                         break;
                     }
                     Set<GameDto> userGames = this.userService.getLoggedUser().getGames();
                     for(GameDto game : userGames){
                         if(game.getTitle().equals(gameTitleToAdd)) {
-                            System.out.println("This game is already in your games inventory.");
+                            ConsoleUtil.printInYellow("This game is already in your games inventory.");
                             break;
                         }
                     }
                     for (GameDto game : loggedUser.getShoppingCart()){
                         if(game.getTitle().equals(gameTitleToAdd)){
-                            System.out.println("This game is already in your shopping cart. Cannot be added twice.");
+                            ConsoleUtil.printInYellow("This game is already in your shopping cart. Cannot be added twice.");
                             break;
                         }
                     }
@@ -183,7 +181,7 @@ public class ApplicationRunner implements CommandLineRunner {
 
                 case "RemoveItem":
                     if((loggedUser = this.userService.getLoggedUser()) == null){
-                        System.out.println("You must be logged in to add a game to shopping cart.");
+                        ConsoleUtil.printInYellow("You must be logged in to add a game to shopping cart.");
                         break;
                     }
 
@@ -200,12 +198,12 @@ public class ApplicationRunner implements CommandLineRunner {
                         loggedUser.getShoppingCart().removeIf(g -> g.getTitle().equals(gameTitleToRemove));
                         this.userService.updateUser(loggedUser);
                         ConsoleUtil.printInRed(gameTitleToRemove + " removed from cart.");
-                    } else System.out.println("Cannot remove game. Game not persists in shopping cart.");
+                    } else ConsoleUtil.printInYellow("Cannot remove game. Game not persists in shopping cart.");
 
                     break;
                 case "BuyItem":
                     if((loggedUser = this.userService.getLoggedUser()) == null){
-                        System.out.println("You must be logged in to buy games.");
+                        ConsoleUtil.printInYellow("You must be logged in to buy games.");
                         break;
                     }
                     UserDto user = this.userService.getLoggedUser();
@@ -221,7 +219,7 @@ public class ApplicationRunner implements CommandLineRunner {
 
                 case "Show shopping cart":
                     if((loggedUser = this.userService.getLoggedUser()) == null){
-                        System.out.println("You must be logged in to add a game to shopping cart.");
+                        ConsoleUtil.printInYellow("You must be logged in to add a game to shopping cart.");
                         break;
                     }
 
@@ -229,7 +227,7 @@ public class ApplicationRunner implements CommandLineRunner {
                         System.out.println(" /Shopping cart: ");
                         loggedUser.getShoppingCart().forEach(g-> System.out.println(g.getTitle()));
                     }
-                    else System.out.println("Shopping cart is empty.");
+                    else ConsoleUtil.printInYellow("Shopping cart is empty.");
                     break;
                 default:
                     ConsoleUtil.printInRed("This command in invalid. Please enter a valid command.");
